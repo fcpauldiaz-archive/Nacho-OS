@@ -44,6 +44,7 @@ public class Communicator {
      * @param	word	the integer to transfer.
      */
     public void speak(int word) {
+        //Tarea 3.1
         lock.aquire();
         //hay un nuevo speaker en lock
         speaker++
@@ -71,6 +72,7 @@ public class Communicator {
      * @return	the integer transferred.
      */    
     public int listen() {
+        //Tarea 3.2
         lock.aquire();
         //hay alguien escuchando
         listener++;
@@ -82,9 +84,10 @@ public class Communicator {
 
         //ya se transfirio la palabra
         this.wordReady = false;
+
         //deja de escuchar
         listener--;
-        
+
         lock.release();
 
 	    return word;
