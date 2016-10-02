@@ -10,10 +10,24 @@ import nachos.machine.*;
  * threads can be paired off at this point.
  */
 public class Communicator {
+    
+    private int listener = 0;             
+    private int speaker  = 0;             
+    private int transferWord = 0;                 
+    private boolean wordReady;  
+
+    private Lock lock;                    
+    private Condition condSpeaker;       
+    private Condition condListener;      
+
+
     /**
      * Allocate a new communicator.
      */
     public Communicator() {
+        this.lock = new Lock();
+        this.condListener = new Condition();
+        this.condListener = new Condition();
     }
 
     /**
@@ -25,11 +39,28 @@ public class Communicator {
      * Exactly one listener should receive <i>word</i>.
      *
      * solo puede hablar una persona a la vez.
-     * Si alguien más habla .
+     * Si alguien más habla espera.
      * No puede hablar alguien si no hay nadie escuchando
      * @param	word	the integer to transfer.
      */
     public void speak(int word) {
+        lock.aquire();
+        //hay un nuevo speaker en lock
+        speaker++
+
+        //si no hay nadie escuchando o está listo para transferir
+        while (wordReady || listener == 0) { 
+            condSpeaker.sleep(); 
+        }
+
+        //speaker says the word
+        this.transferWord = word;
+        //listo para trasferir word
+        this.wordReady = true;
+        //deja de hablar
+        speaker--;
+
+        lock.release();
     }
 
     /**
@@ -40,6 +71,22 @@ public class Communicator {
      * @return	the integer transferred.
      */    
     public int listen() {
-	return 0;
+        lock.aquire();
+        //hay alguien escuchando
+        listener++;
+        //Mientras no haya nadie escuchando
+        while (wordReady == false) {  
+            condListener.sleep();  
+        }
+        int word = this.transferWord;
+
+        //ya se transfirio la palabra
+        this.wordReady = false;
+        //deja de escuchar
+        listener--;
+        
+        lock.release();
+
+	    return word;
     }
 }
