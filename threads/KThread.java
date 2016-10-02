@@ -182,6 +182,7 @@ public class KThread {
      * delete this thread.
      */
    public static void finish() {
+   		//Tarea 1.2
         Lib.debug(dbgThread, "Finishing thread: " + currentThread.toString());
 
         Machine.interrupt().disable();
@@ -199,7 +200,7 @@ public class KThread {
         currentThread.status = statusFinished;
 
         sleep();
-        	//pseudocode
+        //pseudocode
 		//while queue
 		// t = queue.nextThread
 		//T.ready
@@ -283,7 +284,7 @@ public class KThread {
      */
     public void join() {
 
-
+    //Tarea 1.1
 	Lib.debug(dbgThread, "Joining to thread: " + toString());
 
 	Lib.assertTrue(this != currentThread);

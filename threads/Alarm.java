@@ -32,7 +32,8 @@ public class Alarm {
      * that should be run.
      */
     public void timerInterrupt() {
-	  
+	     
+        boolean intStatus = Machine.interrupt().disable();
         long time = Machine.timer().getTime();
         if (waitingThreads.isEmpty()) {
             return; 
@@ -52,6 +53,7 @@ public class Alarm {
             Lib.assertTrue(next.getTime() <= time);
             System.out.println("Thread name alarm " + next.getThread().getName());
         }
+        Machine.interrupt().restore(intStatus);
     
     }
 
@@ -71,18 +73,17 @@ public class Alarm {
      */
     public void waitUntil(long x) {
 
-       boolean intStatus = Machine.interrupt().disable();
+      boolean intStatus = Machine.interrupt().disable();
     	// for now, cheat just to get something working (busy waiting is bad)
     	long wakeTime = Machine.timer().getTime() + x;
        
         
-        ThreadWaiting alarmTo = new ThreadWaiting(wakeTime, KThread.currentThread());
-        waitingThreads.add(alarmTo);
-    	//while (wakeTime > Machine.timer().getTime()) {
-        //    KThread.yield();
-        //}
+      ThreadWaiting alarmTo = new ThreadWaiting(wakeTime, KThread.currentThread());
+      waitingThreads.add(alarmTo);
+    	 
+      KThread.sleep();
 
-        Machine.interrupt().restore(intStatus);
+      Machine.interrupt().restore(intStatus);
 
     }
 
