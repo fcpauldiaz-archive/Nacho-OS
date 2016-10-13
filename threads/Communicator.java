@@ -58,6 +58,8 @@ public class Communicator {
         this.transferWord = word;
         //listo para trasferir word
         this.wordReady = true;
+        //Wake all listeners
+        condListener.wakeAll(); 
         //deja de hablar
         speaker--;
 
@@ -78,6 +80,7 @@ public class Communicator {
         listener++;
         //Mientras no haya nadie escuchando
         while (wordReady == false) {  
+            condSpeaker.wakeAll();
             condListener.sleep();  
         }
         int word = this.transferWord;
@@ -90,6 +93,6 @@ public class Communicator {
 
         lock.release();
 
-	    return word;
+        return word;
     }
 }
