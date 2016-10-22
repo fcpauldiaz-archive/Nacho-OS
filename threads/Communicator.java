@@ -26,8 +26,6 @@ public class Communicator {
      */
     public Communicator() {
         this.lock = new Lock();
-        this.condListener = new Condition();
-        this.condListener = new Condition();
     }
 
     /**
@@ -45,9 +43,9 @@ public class Communicator {
      */
     public void speak(int word) {
         //Tarea 3.1
-        lock.aquire();
+        lock.acquire();
         //hay un nuevo speaker en lock
-        speaker++
+        speaker++;
 
         //si no hay nadie escuchando o está listo para transferir
         while (wordReady || listener == 0) { 
@@ -75,7 +73,7 @@ public class Communicator {
      */    
     public int listen() {
         //Tarea 3.2
-        lock.aquire();
+        lock.acquire();
         //hay alguien escuchando
         listener++;
         //Mientras no haya nadie escuchando

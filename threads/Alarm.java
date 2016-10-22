@@ -32,7 +32,7 @@ public class Alarm {
      * that should be run.
      */
     public void timerInterrupt() {
-	     
+	      //Tarea 2.2
         boolean intStatus = Machine.interrupt().disable();
         long time = Machine.timer().getTime();
         if (waitingThreads.isEmpty()) {
@@ -51,7 +51,7 @@ public class Alarm {
            
             it.remove();
             Lib.assertTrue(next.getTime() <= time);
-            System.out.println("Thread name alarm " + next.getThread().getName());
+            System.out.println("Thread name alarm "   + next.getThread().getName() + " saliendo " + next.getTime());
         }
         Machine.interrupt().restore(intStatus);
     
@@ -72,12 +72,11 @@ public class Alarm {
      * @see	nachos.machine.Timer#getTime()
      */
     public void waitUntil(long x) {
-
+      //Tarea 2.1
       boolean intStatus = Machine.interrupt().disable();
     	// for now, cheat just to get something working (busy waiting is bad)
     	long wakeTime = Machine.timer().getTime() + x;
        
-        
       ThreadWaiting alarmTo = new ThreadWaiting(wakeTime, KThread.currentThread());
       waitingThreads.add(alarmTo);
     	 

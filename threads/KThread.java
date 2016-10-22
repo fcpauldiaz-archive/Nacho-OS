@@ -296,7 +296,7 @@ public class KThread {
         return;
     }
     else {
-    	Machine.interrupt().disable();
+    	boolean intStatus = Machine.interrupt().disable();
 
     	//Agregar el current thread a la cola del join
     	this.joinQueue.waitForAccess(currentThread);
@@ -304,7 +304,7 @@ public class KThread {
         // Se llama a sleep en el thread actual porque se necesita esperar a que termine el thread
         // cuando se termina se llama al metodo finish()
         currentThread.sleep();
-        Machine.interrupt().enable();
+        Machine.interrupt().restore(intStatus);
     }
 
 
@@ -427,7 +427,18 @@ public class KThread {
 	public void run() { 
 		for (int i=0; i<5; i++) { 
 			System.out.println("*** thread " + which + " looped " + i + " times, Tick:" + Machine.timer().getTime()); 
-			if ((which == 1) && (i==0)) ThreadedKernel.alarm.waitUntil(1000); 
+			if (AlarmTest) { 
+        if ((which==2) && (i==0)) { 
+          long time=1080; 
+          System.out.println("** "+dos.getName()+" esperara al menos "+time+" ticks, despertara aprox. en "+(Machine.timer().getTime()+time)); 
+          ThreadedKernel.alarm.waitUntil(time); 
+        } if ((which==3) && (i==1)) {
+         long time=540; 
+         System.out.println("** "+tres.getName()+" esperara al menos "+time+" ticks, despertara aprox. en "+(Machine.timer().getTime()+time)); 
+         ThreadedKernel.alarm.waitUntil(time);
+          } 
+        } 
+      if ((which == 1) && (i==0)) ThreadedKernel.alarm.waitUntil(1000); 
 			if ((which == 1) && (i==1)) dos.join(); 
 			if ((which == 0) && (i==2)) dos.join(); 
 			if ((which == 2) && (i==3)) tres.join(); 
@@ -495,7 +506,9 @@ public class KThread {
 
     private ThreadQueue joinQueue = ThreadedKernel.scheduler.newThreadQueue(true);
     public static KThread tres = null; 
-	public static KThread uno = null; 
-	public static KThread dos = null; 
-	public static KThread cero = null; 
+  	public static KThread uno = null; 
+  	public static KThread dos = null; 
+  	public static KThread cero = null; 
+    public static boolean AlarmTest = false;
+    public static boolean comunicatorTest = false;
 }
