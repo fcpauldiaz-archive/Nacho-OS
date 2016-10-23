@@ -455,35 +455,38 @@ public class KThread {
     public static void selfTest() {
 
 		Lib.debug(dbgThread, "Enter KThread.selfTest"); 
-    if (joinTest) {
-  		cero = new KThread(new PingTest(0)).setName("forked thread0"); 
-  		cero.fork(); 
+        if (joinTest) {
+      		cero = new KThread(new PingTest(0)).setName("forked thread0"); 
+      		cero.fork(); 
 
-  		uno = new KThread(new PingTest(1)).setName("forked thread1"); 
-  		uno.fork(); 
-  		dos = new KThread(new PingTest(2)).setName("forked thread2"); 
-  		dos.fork();
-  		tres = new KThread(new PingTest(3)).setName("forked thread3"); 
-  		tres.fork(); 
-    }
-    if (comunicatorTest) {
-      //PRUEBA PARA LOS LISTENER Y SPEAKERS
-      Communicator com = new Communicator();
-      Lib.debug(dbgThreadComunicator, "Enter comunicator test"); 
-      cero = new KThread(new ListenerTest(com)).setName("Listener 1");
-      cero.fork();
-      uno = new KThread(new SpeakerTest(com)).setName("Speaker 1");
-      uno.fork();
-      dos = new KThread(new SpeakerTest(com)).setName("Speaker 2");
-      dos.fork();
-      tres = new KThread(new ListenerTest(com)).setName("Listener 2");
-      tres.fork(); 
-      cero.join();
-      uno.join();
-      dos.join();
-      tres.join();
-      Lib.debug(dbgThreadComunicator, "Sale comunicator");
-    }
+      		uno = new KThread(new PingTest(1)).setName("forked thread1"); 
+      		uno.fork(); 
+      		dos = new KThread(new PingTest(2)).setName("forked thread2"); 
+      		dos.fork();
+      		tres = new KThread(new PingTest(3)).setName("forked thread3"); 
+      		tres.fork(); 
+        }
+        if (comunicatorTest) {
+          //PRUEBA PARA LOS LISTENER Y SPEAKERS
+          Communicator com = new Communicator();
+          Lib.debug(dbgThreadComunicator, "Enter comunicator test"); 
+          cero = new KThread(new ListenerTest(com)).setName("Listener 1");
+          cero.fork();
+          uno = new KThread(new SpeakerTest(com)).setName("Speaker 1");
+          uno.fork();
+          dos = new KThread(new SpeakerTest(com)).setName("Speaker 2");
+          dos.fork();
+          tres = new KThread(new ListenerTest(com)).setName("Listener 2");
+          tres.fork(); 
+          cero.join();
+          uno.join();
+          dos.join();
+          tres.join();
+          Lib.debug(dbgThreadComunicator, "Sale comunicator");
+        }
+        if (boatTest) {
+            Boat b = new Boat();
+        }
     }
 
     private static final char dbgThread = 't';
@@ -530,6 +533,7 @@ public class KThread {
   	public static KThread dos = null; 
   	public static KThread cero = null; 
     public static boolean AlarmTest = false;
-    public static boolean comunicatorTest = true;
+    public static boolean comunicatorTest = false;
     public static boolean joinTest = false;
+    public static boolean boatTest = true;
 }
