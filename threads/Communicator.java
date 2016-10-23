@@ -17,8 +17,8 @@ public class Communicator {
     private boolean wordReady;  
 
     private Lock lock;                    
-    private Condition condSpeaker;       
-    private Condition condListener;      
+    private Condition2 condSpeaker;       
+    private Condition2 condListener;      
 
 
     /**
@@ -26,8 +26,8 @@ public class Communicator {
      */
     public Communicator() {
         this.lock = new Lock();
-        this.condSpeaker = new Condition(lock);
-        this.condListener = new Condition(lock);
+        this.condSpeaker = new Condition2(lock);
+        this.condListener = new Condition2(lock);
     }
 
     /**

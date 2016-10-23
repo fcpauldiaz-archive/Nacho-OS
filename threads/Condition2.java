@@ -9,19 +9,25 @@ import nachos.machine.*;
  * <p>
  * You must implement this.
  *
- * @see	nachos.threads.Condition
+ * @see nachos.threads.Condition
  */
 public class Condition2 {
+
+    private Lock conditionLock;
+    private ThreadQueue waiter;
+
     /**
      * Allocate a new condition variable.
      *
-     * @param	conditionLock	the lock associated with this condition
-     *				variable. The current thread must hold this
-     *				lock whenever it uses <tt>sleep()</tt>,
-     *				<tt>wake()</tt>, or <tt>wakeAll()</tt>.
+     * @param   conditionLock   the lock associated with this condition
+     *              variable. The current thread must hold this
+     *              lock whenever it uses <tt>sleep()</tt>,
+     *              <tt>wake()</tt>, or <tt>wakeAll()</tt>.
      */
     public Condition2(Lock conditionLock) {
-	this.conditionLock = conditionLock;
+       this.conditionLock = conditionLock;
+       //el false le dice que no da prioridad
+       waiter = ThreadedKernel.scheduler.newThreadQueue(false);
     }
 
     /**
@@ -31,11 +37,17 @@ public class Condition2 {
      * automatically reacquire the lock before <tt>sleep()</tt> returns.
      */
     public void sleep() {
-	Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+        Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+        boolean intStatus = Machine.interrupt().disable();
 
-	conditionLock.release();
+        conditionLock.release();
 
-	conditionLock.acquire();
+        this.waiter.waitForAccess(KThread.currentThread());
+
+        KThread.currentThread().sleep();
+
+        conditionLock.acquire();
+        Machine.interrupt().restore(intStatus);
     }
 
     /**
@@ -43,7 +55,16 @@ public class Condition2 {
      * current thread must hold the associated lock.
      */
     public void wake() {
-	Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+        Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+
+        boolean intStatus = Machine.interrupt().disable();
+        KThread nextKThread = waiter.nextThread();
+        //cambiar estado del next kThread
+        if (nextKThread != null) {
+            nextKThread.ready();
+        }
+
+        Machine.interrupt().restore(intStatus);
     }
 
     /**
@@ -51,8 +72,16 @@ public class Condition2 {
      * thread must hold the associated lock.
      */
     public void wakeAll() {
-	Lib.assertTrue(conditionLock.isHeldByCurrentThread());
-    }
+        Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 
-    private Lock conditionLock;
+        boolean intStatus = Machine.interrupt().disable();
+        KThread nextKThread = waiter.nextThread();
+
+        while(nextKThread != null) {
+            nextKThread.ready();
+            nextKThread = waiter.nextThread();
+        }
+
+        Machine.interrupt().restore(intStatus);
+    }
 }
