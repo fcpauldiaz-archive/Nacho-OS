@@ -5,6 +5,7 @@ import nachos.machine.*;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * A scheduler that chooses threads based on their priorities.
@@ -147,7 +148,7 @@ public class PriorityScheduler extends Scheduler {
       Lib.assertTrue(Machine.interrupt().disabled());
       // implement me
       //si no hay, salir
-      if (waitQueue.isEmpty) {
+      if (waitQueue.isEmpty()) {
         return null;
       }
       //picNext Thread devueve thread state
@@ -176,7 +177,7 @@ public class PriorityScheduler extends Scheduler {
 
         //si no hay
         if (waitQueue.isEmpty()) {
-          return ;
+          return null;
         }
 
 
@@ -187,17 +188,16 @@ public class PriorityScheduler extends Scheduler {
         //wait queue es un arraylist the Kthreads
         for (int i = 0; i < waitQueue.size(); i++) {
 
-          KThread threadActual = waitQueue.get(i);
+          KThread threadActual =  (KThread)waitQueue.get(i);
           int prioridadSiguiente = getThreadState(threadActual).getPriority();
 
-          if (threadSiguiente == null || prioridadActual > prioridadSiguiente) { 
+          if (threadSiguiente == null || prioridadSiguiente > prioridadActual) { 
               //actualizar thread
               threadSiguiente = threadActual;
               //actualizar prioridad
-              prioridadSiguiente = prioridadActual;
+              prioridadActual = prioridadSiguiente;
           } 
         }
-
   	    return getThreadState(threadSiguiente);
   	}
   	
@@ -213,7 +213,7 @@ public class PriorityScheduler extends Scheduler {
   	public boolean transferPriority;
 
     // Esctructura para la cola
-    private ArrayList waitQueue = new ArrayList<KThread>();  // hy+
+    private ArrayList<KThread> waitQueue = new ArrayList();  // hy+
 
     //Thread state current
     private ThreadState thState = null;           
@@ -236,8 +236,14 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public ThreadState(KThread thread) {
 	    this.thread = thread;
+      
+	    if (thread.getName().contains("Speaker 2")) {
+        setPriority(4);
+      }
+      else {
+        setPriority(priorityDefault);
+      }
 	    
-	    setPriority(priorityDefault);
 	}
 
 	/**
@@ -266,7 +272,7 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public void setPriority(int priority) {
 	    if (this.priority == priority)
-		return;
+		    return;
 	    
 	    this.priority = priority;
 	    
@@ -287,6 +293,7 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public void waitForAccess(PriorityQueue waitQueue) {
 	    // implement me
+      waitQueue.waitQueue.add(getThread());
 	}
 
 	/**
