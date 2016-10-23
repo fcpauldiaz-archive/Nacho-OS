@@ -26,6 +26,8 @@ public class Communicator {
      */
     public Communicator() {
         this.lock = new Lock();
+        this.condSpeaker = new Condition(lock);
+        this.condListener = new Condition(lock);
     }
 
     /**
@@ -51,7 +53,9 @@ public class Communicator {
         while (wordReady || listener == 0) { 
             condSpeaker.sleep(); 
         }
-
+        lock.release();
+        Lib.debug('c', "Speak word " + word);
+        lock.acquire();
         //speaker says the word
         this.transferWord = word;
         //listo para trasferir word
@@ -82,7 +86,9 @@ public class Communicator {
             condListener.sleep();  
         }
         int word = this.transferWord;
-
+        lock.release();
+        Lib.debug('c', "Listen word " + word);
+        lock.acquire();
         //ya se transfirio la palabra
         this.wordReady = false;
 

@@ -36,13 +36,14 @@ public class Alarm {
         boolean intStatus = Machine.interrupt().disable();
         long time = Machine.timer().getTime();
         if (waitingThreads.isEmpty()) {
+            Machine.interrupt().restore(intStatus);
             return; 
         }
 
         if (((ThreadWaiting)waitingThreads.get(0)).getTime() > time) {
             return;
         }
-          System.out.println("Alarm interrupt time = " + time);
+        Lib.debug('a', "Alarm interrupt time = " + time);
       
         Iterator<ThreadWaiting> it = waitingThreads.iterator();
         while (it.hasNext()) {
@@ -50,11 +51,12 @@ public class Alarm {
             next.getThread().ready();
            
             it.remove();
-            Lib.assertTrue(next.getTime() <= time);
-            System.out.println("Thread name alarm "   + next.getThread().getName() + " saliendo " + next.getTime());
+            //Lib.assertTrue(next.getTime() <= time);
+
+            Lib.debug('a',"Thread name alarm "   + next.getThread().getName() + " saliendo " + next.getTime());
         }
         Machine.interrupt().restore(intStatus);
-    
+        KThread.currentThread().yield();
     }
 
     /**
