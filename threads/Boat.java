@@ -7,7 +7,7 @@ public class Boat
   
     //cantidad de pasajeros en el bote actual
     //la cantidad maxima de pasajeros es de 2
-    public static int cantidadPasajeros = 2;
+    public static int cantidadPasajeros = 0;
     public static Condition boatCondition;
     public static boolean barquito = false;
     public static Lock boatLock;
@@ -56,7 +56,7 @@ public class Boat
 
           public void run() {
             // local varialbe, indicate where person is
-            ChildItinerary();
+            ChildItinerary(false);
           };
       };
 
@@ -64,7 +64,7 @@ public class Boat
 
           public void run() {
               //thread local varialbe, indicate where person is
-              AdultItinerary();
+              AdultItinerary(false);
           };
       };
      
@@ -84,7 +84,7 @@ public class Boat
 
     }
 
-    static void AdultItinerary()
+    static void AdultItinerary(boolean islaActual )
     {
     	/* This is where you should put your solutions. Make calls
     	   to the BoatGrader to show that it is synchronized. For
@@ -92,23 +92,22 @@ public class Boat
     	       bg.AdultRowToMolokai();
     	   indicates that an adult has rowed the boat across to Molokai
     	*/
-      boolean islaActual = false;
       boatLock.acquire();
       while (true) {
         //si el thread adulto está en oahu
         if (islaActual == false) {
           //si no hay esapcio
             if (barquito == false) {
-              if (!(cantidadPasajeros > 1)) {
+              if ((cantidadPasajeros > 1)) {
                 oahu.sleep();
               }
-              else if (oahu.getChildren() > 2) {
+              else if (oahu.getChildren() >= 2) {
                 oahu.sleep();
               }
               else {
                 //cambia de isla
                 islaActual = true;
-                cantidadPasajeros = 0;
+                cantidadPasajeros = 2;
                 oahu.decreaseAdult();
                 
                 bg.AdultRowToMolokai(); 
@@ -122,7 +121,7 @@ public class Boat
                 
                // Lib.assertTrue(molokai.getChildren() > 0);
                 molokai.wakeAll();
-                cantidadPasajeros = 2;
+                cantidadPasajeros = 0;
                 barquito = true;
                  //System.out.println("Adultss on oahu" + oahu.getAdults());
                 molokai.sleep();
@@ -144,9 +143,8 @@ public class Boat
 
     }
 
-    static void ChildItinerary()
+    static void ChildItinerary(boolean islaActual)
     {
-      boolean islaActual = false;
       boatLock.acquire();
    
       while (true) {
@@ -158,11 +156,11 @@ public class Boat
             if (oahu.getChildren() < 2) {
               oahu.sleep();
             }
-            if (cantidadPasajeros == 2) {
+            if (cantidadPasajeros == 0) {
 
               islaActual = true;
               oahu.decreaseChildren();
-              cantidadPasajeros = 1;
+              cantidadPasajeros++;
               
               bg.ChildRowToMolokai();
               Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
@@ -174,7 +172,7 @@ public class Boat
               }
               else {
                 barquito = true;
-                cantidadPasajeros = 2;
+                cantidadPasajeros = 0;
                 molokai.setCantidadOtra(oahu.getAllPeople());
                 molokai.addChildren();
                 molokai.wakeAll();
@@ -189,7 +187,7 @@ public class Boat
               Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
               Lib.debug(dbChar, "");
 
-              cantidadPasajeros = 2;
+              cantidadPasajeros = 0;
               molokai.setCantidadOtra(oahu.getAllPeople());
               molokai.addChildren();
               molokai.addChildren();
@@ -208,16 +206,16 @@ public class Boat
             }
             else {
               if (barquito == true) {
-                cantidadPasajeros = 1;
+                //cantidadPasajeros = 1;
                 islaActual = false;
                 barquito = false;
               
                 bg.ChildRowToOahu();
                 Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
                 Lib.debug(dbChar, "");
-                
+
                 molokai.decreaseChildren();
-                cantidadPasajeros = 2;
+                cantidadPasajeros = 0;
                 oahu.addChildren();
                 oahu.setCantidadOtra(molokai.getAllPeople());
                 oahu.wakeAll();
