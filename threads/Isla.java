@@ -3,10 +3,11 @@ import nachos.ag.BoatGrader;
 
 public class Isla {
 
-  private static String nombre;
-  private static int cantidadAdultos;
-  private static int cantidadNinos;
-  private static Condition esperandoIsla;
+  private  String nombre;
+  private  int cantidadAdultos;
+  private  int cantidadNinos;
+  private  Condition esperandoIsla;
+  private  int cantidadOtra;
 
 
   public Isla(String nombre, Lock lock) {
@@ -14,51 +15,62 @@ public class Isla {
     this.cantidadAdultos = 0;
     this.cantidadNinos = 0;
     this.esperandoIsla = new Condition(lock);
+    this.cantidadOtra = 0;
+  }
+
+  public void setCantidadOtra (int val) {
+    cantidadOtra = val;
+  }
+  public int getCantidadOtra() {
+    return cantidadOtra;
   }
 
   public void setPeople(int adultos, int ninos) {
-    this.cantidadAdultos = adultos;
-    this.cantidadNinos = ninos;
+    cantidadAdultos = adultos;
+    cantidadNinos = ninos;
   }
 
-  public static String getNombre() {
+  public  String getNombre() {
     return nombre;
   }
 
-  public static int getAdults() {
+  public  int getAdults() {
     return cantidadAdultos;
   }
 
-  public static int getChildren() {
+  public  int getChildren() {
     return cantidadNinos;
   }
 
-  public static void sleep() {
+  public  void sleep() {
     esperandoIsla.sleep();
   }
 
-  public static void wakeAll() {
+  public  void wakeAll() {
     esperandoIsla.wakeAll();
   }
 
+  public  void wake() {
+    esperandoIsla.wake();
+  }
 
-  public static int getAllPeople() {
+  public  int getAllPeople() {
     return cantidadAdultos + cantidadNinos;
   }
 
-  public static void addAdult() {
+  public  void addAdult() {
     cantidadAdultos++;
   }
 
-  public static void addChildren() {
+  public  void addChildren() {
     cantidadNinos++;
   }
 
-  public static void decreaseAdult() {
+  public  void decreaseAdult() {
     cantidadAdultos--;
   }
 
-  public static void decreaseChildren() {
+  public  void decreaseChildren() {
     cantidadNinos--;
   }
 
