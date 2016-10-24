@@ -110,14 +110,16 @@ public class Boat
                 islaActual = true;
                 cantidadPasajeros = 0;
                 oahu.decreaseAdult();
-                //System.out.println("Adultss on oahu" + oahu.getAdults() + " " +  KThread.currentThread().getName());
-                bg.AdultRowToMolokai();
+                
+                bg.AdultRowToMolokai(); 
+                Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
+                Lib.debug(dbChar, "");
                 //sale de la isla
-                //System.out.println("Adultss on oahu " + oahu.getAdults() + " " + KThread.currentThread().getName());
+                
                 molokai.addAdult();
                 molokai.setCantidadOtra(oahu.getAllPeople());
                 //System.out.println("Adults on molokai " + molokai.getAdults());
-                //System.out.println("Adultss on oahu " + oahu.getAdults() + " " + KThread.currentThread().getName());
+                
                // Lib.assertTrue(molokai.getChildren() > 0);
                 molokai.wakeAll();
                 cantidadPasajeros = 2;
@@ -157,12 +159,14 @@ public class Boat
               oahu.sleep();
             }
             if (cantidadPasajeros == 2) {
+
               islaActual = true;
               oahu.decreaseChildren();
               cantidadPasajeros = 1;
+              
               bg.ChildRowToMolokai();
-              //System.out.println("Ouahu Children " + oahu.getChildren());
-              //System.out.println("Ouahu Adult "  + oahu.getAdults());
+              Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
+              Lib.debug(dbChar, "");
               if (oahu.getChildren() > 0) {
                 oahu.addChildren();
                 oahu.wakeAll();
@@ -171,7 +175,6 @@ public class Boat
               else {
                 barquito = true;
                 cantidadPasajeros = 2;
-
                 molokai.setCantidadOtra(oahu.getAllPeople());
                 molokai.addChildren();
                 molokai.wakeAll();
@@ -183,8 +186,9 @@ public class Boat
               oahu.decreaseChildren();
               oahu.decreaseChildren();
               bg.ChildRideToMolokai();
-              //System.out.println("Oahu children" + oahu.getChildren());
-              //System.out.println("Oahu adults " + oahu.getAdults());
+              Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
+              Lib.debug(dbChar, "");
+
               cantidadPasajeros = 2;
               molokai.setCantidadOtra(oahu.getAllPeople());
               molokai.addChildren();
@@ -207,8 +211,11 @@ public class Boat
                 cantidadPasajeros = 1;
                 islaActual = false;
                 barquito = false;
-                //System.out.println("Otra " +molokai.getCantidadOtra());
+              
                 bg.ChildRowToOahu();
+                Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
+                Lib.debug(dbChar, "");
+                
                 molokai.decreaseChildren();
                 cantidadPasajeros = 2;
                 oahu.addChildren();
