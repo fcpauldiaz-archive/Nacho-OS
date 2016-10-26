@@ -14,12 +14,14 @@ public class Boat
     public static Isla oahu;
     public static Isla molokai;; 
     public static char dbChar = 'b';
+    public static Communicator com;
 
     public Boat() {
       this.boatLock = new Lock();
       this.boatCondition = new Condition(boatLock);
       this.oahu = new Isla("Oahu", boatLock);
       this.molokai = new Isla("Monokai", boatLock);
+      this.com = new Communicator();
       selfTest();
     }
 
@@ -28,7 +30,7 @@ public class Boat
     	BoatGrader b = new BoatGrader();
     	
     	System.out.println("\n ***Testing Boats with only 2 children***");
-    	begin(1, 2, b);
+    	begin(19, 5, b);
 
       //	System.out.println("\n ***Testing Boats with 2 children, 1 adult***");
       //  	begin(1, 2, b);
@@ -80,6 +82,16 @@ public class Boat
           cThread.fork();
       }
         
+      while(true) {
+          int personas = com.listen();
+
+          Lib.debug(dbChar, "***** Se han transportado " + personas + " personas");
+          Lib.debug(dbChar, "***** Se tenían que transportar " + (children + adults) + " Personas");
+          if (personas == children + adults)
+          {
+            break;
+          }
+      }
     
 
     }
@@ -139,7 +151,7 @@ public class Boat
 
           
       }
-      //boatLock.release();
+      boatLock.release();
 
     }
 
@@ -202,7 +214,8 @@ public class Boat
           }
           }else if (islaActual == true) {
             if (molokai.getCantidadOtra() == 0) {
-              molokai.sleep();
+             com.speak(molokai.getAllPeople());
+             // molokai.sleep();
             }
             else {
               if (barquito == true) {
