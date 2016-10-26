@@ -426,43 +426,65 @@ public class KThread {
 	} 
 	public void run() { 
 		for (int i=0; i<5; i++) { 
-			System.out.println("*** thread " + which + " looped " + i + " times, Tick:" + Machine.timer().getTime()); 
+			Lib.debug(dbgThread, "*** thread " + which + " looped " + i + " times, Tick:" + Machine.timer().getTime()); 
 			if (AlarmTest) { 
-        if ((which==2) && (i==0)) { 
-          long time=1080; 
-          System.out.println("** "+dos.getName()+" esperara al menos "+time+" ticks, despertara aprox. en "+(Machine.timer().getTime()+time)); 
-          ThreadedKernel.alarm.waitUntil(time); 
-        } if ((which==3) && (i==1)) {
-         long time=540; 
-         System.out.println("** "+tres.getName()+" esperara al menos "+time+" ticks, despertara aprox. en "+(Machine.timer().getTime()+time)); 
-         ThreadedKernel.alarm.waitUntil(time);
-          } 
-        } 
-      if ((which == 1) && (i==0)) ThreadedKernel.alarm.waitUntil(1000); 
-			if ((which == 1) && (i==1)) dos.join(); 
-			if ((which == 0) && (i==2)) dos.join(); 
-			if ((which == 2) && (i==3)) tres.join(); 
-			if ((which == 1) && (i==3)) dos.join(); 
+                if ((which==2) && (i==0)) { 
+                  long time=1080; 
+                 Lib.debug(dbAlarmTest, "** "+dos.getName()+" esperara al menos "+time+" ticks, despertara aprox. en "+(Machine.timer().getTime()+time)); 
+                  ThreadedKernel.alarm.waitUntil(time); 
+                } 
+                if ((which==3) && (i==1)) {
+                    long time=540; 
+                   Lib.debug(dbAlarmTest, "** "+tres.getName()+" esperara al menos "+time+" ticks, despertara aprox. en "+(Machine.timer().getTime()+time)); 
+                    ThreadedKernel.alarm.waitUntil(time);
+                } 
+            } 
+            if ((which == 1) && (i==0)) 
+                ThreadedKernel.alarm.waitUntil(1000); 
+    		if ((which == 1) && (i==1))
+                dos.join(); 
+    		if ((which == 0) && (i==2)) 
+                dos.join(); 
+    		if ((which == 2) && (i==3)) 
+                tres.join(); 
+    		if ((which == 1) && (i==3)) 
+                dos.join(); 
 			currentThread.yield(); 
 			}
 		} 
 		private int which; 
 	}
 
-/*   
+    public static void selfTestRun(KThread t1, int t1p, KThread t2, int t2p, KThread t3, int t3p) { 
+        boolean int_state; 
+
+        int_state = Machine.interrupt().disable(); 
+        ThreadedKernel.scheduler.setPriority(t1, t1p); 
+        ThreadedKernel.scheduler.setPriority(t2, t2p); 
+        ThreadedKernel.scheduler.setPriority(t3, t3p); 
+        Machine.interrupt().restore(int_state); 
+
+        t1.setName("a").fork(); 
+        t2.setName("b").fork(); 
+        t3.setName("c").fork(); 
+        t1.join(); 
+        t2.join(); 
+        t3.join(); 
+    } 
+
+
     public static void selfTest() {
-
-		Lib.debug(dbgThread, "Enter KThread.selfTest"); 
+        Lib.debug(dbgThread, "Enter KThread.selfTest"); 
         if (joinTest) {
-      		cero = new KThread(new PingTest(0)).setName("forked thread0"); 
-      		cero.fork(); 
+            cero = new KThread(new PingTest(0)).setName("forked thread0"); 
+            cero.fork(); 
 
-      		uno = new KThread(new PingTest(1)).setName("forked thread1"); 
-      		uno.fork(); 
-      		dos = new KThread(new PingTest(2)).setName("forked thread2"); 
-      		dos.fork();
-      		tres = new KThread(new PingTest(3)).setName("forked thread3"); 
-      		tres.fork(); 
+            uno = new KThread(new PingTest(1)).setName("forked thread1"); 
+            uno.fork(); 
+            dos = new KThread(new PingTest(2)).setName("forked thread2"); 
+            dos.fork();
+            tres = new KThread(new PingTest(3)).setName("forked thread3"); 
+            tres.fork(); 
         }
         if (comunicatorTest) {
           //PRUEBA PARA LOS LISTENER Y SPEAKERS
@@ -485,187 +507,65 @@ public class KThread {
         if (boatTest) {
             Boat b = new Boat();
         }
-    }*/
-
-    public static void selfTestRun(KThread t1, int t1p, KThread t2, int t2p, KThread t3, int t3p) { 
-
-
-    boolean int_state; 
-
-
-    int_state = Machine.interrupt().disable(); 
-
-    ThreadedKernel.scheduler.setPriority(t1, t1p); 
-
-    ThreadedKernel.scheduler.setPriority(t2, t2p); 
-
-    ThreadedKernel.scheduler.setPriority(t3, t3p); 
-
-    Machine.interrupt().restore(int_state); 
-
-
-    t1.setName("a").fork(); 
-
-    t2.setName("b").fork(); 
-
-    t3.setName("c").fork(); 
-
-    t1.join(); 
-
-    t2.join(); 
-
-    t3.join(); 
-
-
-} 
-
-
-/** * Tests whether this module is working. */
-public static void selfTest() {
-    // Lib.debug(dbgThread, "Enter KThread.selfTest"); 
-    // cero = new KThread(new PingTest(0)).setName("forked thread0");
-    // cero.fork();
-    // uno = new KThread(new PingTest(1)).setName("forked thread1");
-    // uno.fork();
-    // dos = new KThread(new PingTest(2)).setName("forked thread2");
-    // dos.fork();
-    // tres = new KThread(new PingTest(3)).setName("forked thread3");
-    // tres.fork(); 
-    // Communicator com = new Communicator();
-    // cero = new KThread(new prove_listen(com)).setName("YO");
-    // cero.fork();
-    // uno = new KThread(new prove_speack(com)).setName("TU");
-    // uno.fork();
-    // dos = new KThread(new prove_listen(com)).setName("YO2");
-    // dos.fork();
-    // tres = new KThread(new prove_speack(com)).setName("TU2");
-    // tres.fork();
-    // cero.join();
-    // uno.join();
-    // dos.join();
-    // tres.join();
-    
-    /* Prueba del boat */
-    //Boat prueba = new Boat();
-    //prueba.selfTest();
-
-    /* 
-    * Case 3: Tests priority donation 
-    * 
-    * This runs t1 with priority 7, t2 with priority 6 and t3 with 
-    * priority 4. t1 will wait on a lock, and while t2 would normally 
-    * then steal all available CPU, priority donation will ensure that 
-    * t3 is given control in order to help unlock t1. 
-    * 
-    */ 
-
-
-    System.out.println("Case 3:"); 
-
-
-    final Lock lock = new Lock(); 
-
-    Condition2 condition = new Condition2(lock); 
-
-
-    KThread t1 = new KThread(new Runnable() 
-
-    { 
-
-    public void run() 
-
-    { 
-
-    lock.acquire(); 
-
-    System.out.println(KThread.currentThread().getName() + " active"); 
-
-    lock.release(); 
-
-    } 
-
-    }); 
-
-
-    KThread  t2 = new KThread(new Runnable() 
-
-    { 
-
-    public void run() 
-
-    { 
-
-    System.out.println(KThread.currentThread().getName() + " started working"); 
-
-    for (int i = 0; i < 3; ++i) 
-
-    { 
-
-    System.out.println(KThread.currentThread().getName() + " working " + i); 
-
-    KThread.yield(); 
-
-    } 
-
-    System.out.println(KThread.currentThread().getName() + " finished working"); 
-
-    } 
-
-
-    }); 
-
-
-    KThread  t3 = new KThread(new Runnable() 
-
-    { 
-
-    public void run() 
-
-    { 
-
-    lock.acquire(); 
-
-
-    boolean int_state = Machine.interrupt().disable(); 
-
-    ThreadedKernel.scheduler.setPriority(2); 
-
-    Machine.interrupt().restore(int_state); 
-
-
-    KThread.yield(); 
-
-
-    // t1.acquire() will now have to realise that t3 owns the lock it wants to obtain 
-
-    // so program execution will continue here. 
-
-
-    System.out.println(KThread.currentThread().getName() + " active ('a' wants its lock back so we are here)"); 
-
-    lock.release(); 
-
-    KThread.yield(); 
-
-    lock.acquire(); 
-
-    System.out.println(KThread.currentThread().getName() + " active-again (should be after 'a' and 'b' done)"); 
-
-    lock.release(); 
-
-
-    } 
-
-    }); 
-
-
-    selfTestRun(t1, 6, t2, 4, t3, 7); 
-
-
-}
+        /* 
+        * Case 3: Tests priority donation 
+        * 
+        * This runs t1 with priority 7, t2 with priority 6 and t3 with 
+        * priority 4. t1 will wait on a lock, and while t2 would normally 
+        * then steal all available CPU, priority donation will ensure that 
+        * t3 is given control in order to help unlock t1. 
+        * 
+        */ 
+        if (priorityTest) {
+            Lib.debug(dbPriorityCom, "Case 3: "); 
+
+            final Lock lock = new Lock(); 
+            Condition2 condition = new Condition2(lock); 
+            KThread t1 = new KThread(new Runnable() { 
+                public void run()  { 
+                    lock.acquire(); 
+                    Lib.debug(dbPriorityCom,  KThread.currentThread().getName() + " active"); 
+                    lock.release(); 
+                } 
+            }); 
+            KThread  t2 = new KThread(new Runnable() { 
+                public void run() { 
+                    Lib.debug(dbPriorityCom,  KThread.currentThread().getName() + " started working"); 
+                    for (int i = 0; i < 3; ++i) { 
+
+                        Lib.debug(dbPriorityCom,  KThread.currentThread().getName() + " working " + i); 
+                        KThread.yield(); 
+                    } 
+                    Lib.debug(dbPriorityCom,  KThread.currentThread().getName() + " finished working"); 
+                } 
+            }); 
+            KThread  t3 = new KThread(new Runnable() { 
+                public void run() { 
+                    lock.acquire(); 
+                    boolean int_state = Machine.interrupt().disable(); 
+                    ThreadedKernel.scheduler.setPriority(2); 
+                    Machine.interrupt().restore(int_state); 
+                    KThread.yield(); 
+
+                    // t1.acquire() will now have to realise that t3 owns the lock it wants to obtain 
+                    // so program execution will continue here. 
+                    Lib.debug(dbPriorityCom,  KThread.currentThread().getName() + " active ('a' wants its lock back so we are here)"); 
+
+                    lock.release(); 
+                    KThread.yield(); 
+                    lock.acquire(); 
+                    Lib.debug(dbPriorityCom,  KThread.currentThread().getName() + " active-again (should be after 'a' and 'b' done)"); 
+                    lock.release(); 
+                } 
+            }); 
+            selfTestRun(t1, 6, t2, 4, t3, 7); 
+        }
+    }
 
     private static final char dbgThread = 't';
     private static final char dbgThreadComunicator = 'c';
+    private static final char dbPriorityCom = 'p';
+    private static final char dbAlarmTest = 'l';
     /**
      * Additional state used by schedulers.
      *
@@ -707,8 +607,9 @@ public static void selfTest() {
   	public static KThread uno = null; 
   	public static KThread dos = null; 
   	public static KThread cero = null; 
-    public static boolean AlarmTest = false;
-    public static boolean comunicatorTest = false;
-    public static boolean joinTest = false;
-    public static boolean boatTest = true;
+    public static boolean AlarmTest = false; // l
+    public static boolean comunicatorTest = false; // c
+    public static boolean joinTest = false; // t
+    public static boolean boatTest = false; // b
+    public static boolean priorityTest = true; //p 
 }
