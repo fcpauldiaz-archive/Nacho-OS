@@ -87,10 +87,9 @@ public class Boat
 
           Lib.debug(dbChar, "***** Se han transportado " + personas + " personas");
           Lib.debug(dbChar, "***** Se tenían que transportar " + (children + adults) + " Personas");
-          if (personas == children + adults)
-          {
+          if (personas == children + adults) {
             break;
-          }
+          }     
       }
     
 
@@ -212,37 +211,38 @@ public class Boat
           } else {
             oahu.sleep();
           }
-          }else if (islaActual == true) {
-            if (molokai.getCantidadOtra() == 0) {
-             com.speak(molokai.getAllPeople());
-             // molokai.sleep();
-            }
-            else {
-              if (barquito == true) {
-                //cantidadPasajeros = 1;
-                islaActual = false;
-                barquito = false;
-              
-                bg.ChildRowToOahu();
-                Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
-                Lib.debug(dbChar, "");
-
-                molokai.decreaseChildren();
-                cantidadPasajeros = 0;
-                oahu.addChildren();
-                oahu.setCantidadOtra(molokai.getAllPeople());
-                oahu.wakeAll();
-                oahu.sleep();
-
-              }
-              else {
-                molokai.sleep();
-              }
-            }
+        }else if (islaActual == true) {
+          //cuando ya no hay nadie en oahu
+          if (molokai.getCantidadOtra() == 0) {
+           com.speak(molokai.getAllPeople());
+            // molokai.sleep();
           }
           else {
-            break;
+            if (barquito == true) {
+              //cantidadPasajeros = 1;
+              islaActual = false;
+              barquito = false;
+            
+              bg.ChildRowToOahu();
+              Lib.debug(dbChar, "-----> currentThread " + KThread.currentThread().getName());
+              Lib.debug(dbChar, "");
+
+              molokai.decreaseChildren();
+              cantidadPasajeros = 0;
+              oahu.addChildren();
+              oahu.setCantidadOtra(molokai.getAllPeople());
+              oahu.wakeAll();
+              oahu.sleep();
+
+            }
+            else {
+              molokai.sleep();
+            }
           }
+        }
+        else {
+          break;
+        }
          
       }
 
