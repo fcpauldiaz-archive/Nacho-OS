@@ -402,6 +402,7 @@ public class UserProcess {
         return handleOpen(a0, false);
     case syscallWrite:
     case syscallClose:
+        return handleClose(a0);
     case syscallUnlink:
 
 
@@ -479,6 +480,32 @@ public class UserProcess {
         }       
     }
 
+    public int handleClose(a0) {
+        Lib.debug(dbgProcess, "Close file");
+
+        FileDescriptor archivo = fileDescriptor.get(a0);
+        archivo.position = 0;
+        archivo.file.close();
+        return 0;
+    }
+
+    public int handleUnlink(a0) {
+        Lib.debug(dbgProcess, "Unlink file");
+
+        boolean valor = true;
+        String nombreArchivo = readVirtualMemoryString(a0, this.maxLength);
+        int fileFound  = -1;
+        for (int i = 0; i < fileDescriptor.length; i++) {
+            if (fileDescriptor.get(i).file.getName().equals(nombreArchivo)) {
+                fileFound = i;
+            }
+        }
+        if (fileFound < 0) {
+            valor = UserKernel.fileSystem.remove(fileDescriptor.get(fileFound).file.getName());        
+        }
+        return valor ? 0 : -1;      
+
+    }
 
 
     /**
