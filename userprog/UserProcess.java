@@ -394,7 +394,6 @@ public class UserProcess {
 	case syscallHalt:
 	    return handleHalt();
     case syscallCreate:
-        //primer argumento
        return handleCreate(a0, true);
     case syscallRead:
         return handleRead(a0, a1, a2);
@@ -468,31 +467,43 @@ public class UserProcess {
         FileDescriptor archivo = fileDescriptor.get(fileId);
         byte[] buf = new byte[bufferSize];                                   
 
-        // invoke read through stubFilesystem
-        int valor = archivo.file.read(archivo.position, buf, 0, bufferSize);
-        if (valor < 0) {                                                
+        
+        int estado = archivo.file.read(archivo.position, buf, 0, bufferSize);
+        if (estado < 0) {                                                
             return -1;                                                    
         }                                                                 
         else {                                                            
             int offset = writeVirtualMemory(bufferAddress, buf);                  
             archivo.position = archivo.position + offset;                           
-            return valor;                                                
+            return estado;                                                
         }       
     }
 
     public int handleClose(int a0) {
         Lib.debug(dbgProcess, "Close file");
-
+        if (a0 < 0) {
+            return -1;
+        }
+        boolean estado = true;
         FileDescriptor archivo = fileDescriptor.get(a0);
         archivo.position = 0;
         archivo.file.close();
-        return 0;
+        //eliminar el archivo                                
+        if (archivo.readyToDelete) {                                               
+            estado = UserKernel.fileSystem.remove(archivo.file.getName());          
+            archivo.readyToDelete = false;                                           
+        }                  
+        return estado ? 0 : -1;
     }
-
+    /**
+     * Eliminar archivo 
+     * @param  a0 [description]
+     * @return    [description]
+     */
     public int handleUnlink(int a0) {
         Lib.debug(dbgProcess, "Unlink file");
 
-        boolean valor = true;
+        boolean estadoArchivo = true;
         String nombreArchivo = readVirtualMemoryString(a0, this.maxLength);
         int fileFound  = -1;
         for (int i = 0; i < fileDescriptor.size(); i++) {
@@ -501,9 +512,13 @@ public class UserProcess {
             }
         }
         if (fileFound < 0) {
-            valor = UserKernel.fileSystem.remove(fileDescriptor.get(fileFound).file.getName());        
+            //eliminar archivo
+            estadoArchivo = UserKernel.fileSystem.remove(fileDescriptor.get(a0).file.getName());        
         }
-        return valor ? 0 : -1;      
+        else {
+            fileDescriptor.get(fileFound).readyToDelete = true;
+        }
+        return estadoArchivo ? 0 : -1;      
 
     }
 
@@ -543,10 +558,12 @@ public class UserProcess {
 
         public  OpenFile file = null;   
         public  int      position = 0;  
+        public boolean readyToDelete;
 
         public FileDescriptor(OpenFile file, int position) {                                 
             this.file = file;
             this.position = position;
+            this.readyToDelete = false;
         }                                                         
         
                                             
@@ -565,7 +582,8 @@ public class UserProcess {
     private int initialPC, initialSP;
     private int argc, argv;
     private ArrayList<FileDescriptor> fileDescriptor = new ArrayList();
-	private static final int maxLength = 100;
+	private final int maxLength = 256; //cantidad máxima de bytes por archivo
+    private final int maxOpenFiles = 16; //cantidad máxima de procesos permitidos.
     private static final int pageSize = Processor.pageSize;
     private static final char dbgProcess = 'a';
 }
