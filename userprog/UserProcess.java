@@ -469,13 +469,13 @@ public class UserProcess {
 
         // invoke read through stubFilesystem
         int valor = archivo.file.read(archivo.file.position, buf, 0, bufferSize);
-        if (valor < 0) {                                                 /*@BAA*/
-            return -1;                                                    /*@BAA*/
-        }                                                                 /*@BAA*/
-        else {                                                            /*@BAA*/
-            int offset = writeVirtualMemory(bufferAddress, buf);                  /*@BAA*/
-            arhivo.position = archivo.position + offset;                           /*@BAA*/
-            return retval;                                                /*@BAA*/
+        if (valor < 0) {                                                
+            return -1;                                                    
+        }                                                                 
+        else {                                                            
+            int offset = writeVirtualMemory(bufferAddress, buf);                  
+            arhivo.position = archivo.position + offset;                           
+            return valor;                                                
         }       
     }
 
