@@ -480,7 +480,7 @@ public class UserProcess {
         }       
     }
 
-    public int handleClose(a0) {
+    public int handleClose(int a0) {
         Lib.debug(dbgProcess, "Close file");
 
         FileDescriptor archivo = fileDescriptor.get(a0);
@@ -489,13 +489,13 @@ public class UserProcess {
         return 0;
     }
 
-    public int handleUnlink(a0) {
+    public int handleUnlink(int a0) {
         Lib.debug(dbgProcess, "Unlink file");
 
         boolean valor = true;
         String nombreArchivo = readVirtualMemoryString(a0, this.maxLength);
         int fileFound  = -1;
-        for (int i = 0; i < fileDescriptor.length; i++) {
+        for (int i = 0; i < fileDescriptor.size(); i++) {
             if (fileDescriptor.get(i).file.getName().equals(nombreArchivo)) {
                 fileFound = i;
             }
