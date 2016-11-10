@@ -397,7 +397,7 @@ public class UserProcess {
         //primer argumento
        return handleCreate(a0, true);
     case syscallRead:
-        return handleRead(a0);
+        return handleRead(a0, a1, a2);
     case syscallOpen:
         return handleOpen(a0, false);
     case syscallWrite:
@@ -425,7 +425,7 @@ public class UserProcess {
          // abrir archivo a través de stubFilesystem
         OpenFile file  = UserKernel.fileSystem.open(nombreArchivo, open);     
 
-        if (retval == null) {                                              
+        if (file == null) {                                              
             return -1;                                                     
         }
         else if (fileDescriptor.size() > this.maxLength) {
@@ -468,13 +468,13 @@ public class UserProcess {
         byte[] buf = new byte[bufferSize];                                   
 
         // invoke read through stubFilesystem
-        int valor = archivo.file.read(archivo.file.position, buf, 0, bufferSize);
+        int valor = archivo.file.read(archivo.position, buf, 0, bufferSize);
         if (valor < 0) {                                                
             return -1;                                                    
         }                                                                 
         else {                                                            
             int offset = writeVirtualMemory(bufferAddress, buf);                  
-            arhivo.position = archivo.position + offset;                           
+            archivo.position = archivo.position + offset;                           
             return valor;                                                
         }       
     }
