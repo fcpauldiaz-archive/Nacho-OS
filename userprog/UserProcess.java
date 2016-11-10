@@ -3,6 +3,7 @@ package nachos.userprog;
 import nachos.machine.*;
 import nachos.threads.*;
 import nachos.userprog.*;
+import java.util.ArrayList;
 
 import java.io.EOFException;
 
@@ -348,7 +349,8 @@ public class UserProcess {
 
 
     private static final int
-        syscallHalt = 0,
+    
+    syscallHalt = 0,
 	syscallExit = 1,
 	syscallExec = 2,
 	syscallJoin = 3,
@@ -391,6 +393,16 @@ public class UserProcess {
 	switch (syscall) {
 	case syscallHalt:
 	    return handleHalt();
+    case syscallCreate:
+        //primer argumento
+       return handleCreate(a0, true);
+    case syscallRead:
+        return handleRead(a0);
+    case syscallOpen:
+        return handleOpen(a0, false);
+    case syscallWrite:
+    case syscallClose:
+    case syscallUnlink:
 
 
 	default:
@@ -399,6 +411,75 @@ public class UserProcess {
 	}
 	return 0;
     }
+
+    /**
+     * 1.1
+     * Abrir archivo, lo crea si no existe.
+     * Retorna el índice del archivo o -1 si hay error.
+     * 
+     * @param a0 [description]
+     */
+    public int handleCreate(int a0, boolean open) {
+        Lib.debug(dbgProcess, "Create file");
+        String nombreArchivo = readVirtualMemoryString(a0, this.maxLength);
+         // abrir archivo a través de stubFilesystem
+        OpenFile file  = UserKernel.fileSystem.open(nombreArchivo, open);     
+
+        if (retval == null) {                                              
+            return -1;                                                     
+        }
+        else if (fileDescriptor.size() > this.maxLength) {
+            return -1;
+        }                                                                  
+        else {        
+            fileDescriptor.add(new FileDescriptor(file, 0));
+            return fileDescriptor.size()-1;//position                                                                                  /*@BAA*/ 
+        }                              
+
+    }
+    /**
+     * Abir archivo o -1 si hay error.
+     * @param  a0 [description]
+     * @return    [description]
+     */
+    public int handleOpen(int a0, boolean open) {
+        Lib.debug(dbgProcess, "Opening file");
+       return handleCreate(a0, open);
+
+    }
+    /**
+     * Read bytes from file
+     * -1 if error
+     * @param  a0 [description]
+     * @param  a1 [description]
+     * @param  a2 [description]
+     * @return    [description]
+     */
+    public int handleRead(int a0, int a1, int a2) {
+        Lib.debug(dbgProcess, "Read file");
+        int fileId = a0;
+        int bufferAddress = a1;
+        int bufferSize = a2;
+        //validar
+        if (fileId < 0 || fileDescriptor.get(fileId) == null) {
+            return -1;
+        }
+        FileDescriptor archivo = fileDescriptor.get(fileId);
+        byte[] buf = new byte[bufferSize];                                   
+
+        // invoke read through stubFilesystem
+        int valor = archivo.file.read(archivo.file.position, buf, 0, bufferSize);
+        if (valor < 0) {                                                 /*@BAA*/
+            return -1;                                                    /*@BAA*/
+        }                                                                 /*@BAA*/
+        else {                                                            /*@BAA*/
+            int offset = writeVirtualMemory(bufferAddress, buf);                  /*@BAA*/
+            arhivo.position = archivo.position + offset;                           /*@BAA*/
+            return retval;                                                /*@BAA*/
+        }       
+    }
+
+
 
     /**
      * Handle a user exception. Called by
@@ -430,6 +511,19 @@ public class UserProcess {
 	}
     }
 
+
+    public class FileDescriptor {  
+
+        public  OpenFile file = null;   
+        public  int      position = 0;  
+
+        public FileDescriptor(OpenFile file, int position) {                                 
+            this.file = file;
+            this.position = position;
+        }                                                         
+        
+                                            
+    }       
     /** The program being run by this process. */
     protected Coff coff;
 
@@ -443,7 +537,8 @@ public class UserProcess {
     
     private int initialPC, initialSP;
     private int argc, argv;
-	
+    private ArrayList<FileDescriptor> fileDescriptor = new ArrayList();
+	private static final int maxLength = 100;
     private static final int pageSize = Processor.pageSize;
     private static final char dbgProcess = 'a';
 }
