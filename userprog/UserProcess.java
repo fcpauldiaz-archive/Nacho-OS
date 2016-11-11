@@ -400,6 +400,7 @@ public class UserProcess {
     case syscallOpen:
         return handleOpen(a0, false);
     case syscallWrite:
+        return handleWrite(a0, a1, a2);
     case syscallClose:
         return handleClose(a0);
     case syscallUnlink:
@@ -455,16 +456,14 @@ public class UserProcess {
      * @param  a2 [description]
      * @return    [description]
      */
-    public int handleRead(int a0, int a1, int a2) {
+    public int handleRead(int index, int bufferAddress, int bufferSize) {
         Lib.debug(dbgProcess, "Read file");
-        int fileId = a0;
-        int bufferAddress = a1;
-        int bufferSize = a2;
+       
         //validar
-        if (fileId < 0 || fileDescriptor.get(fileId) == null) {
+        if (index < 0 || fileDescriptor.get(index) == null) {
             return -1;
         }
-        FileDescriptor archivo = fileDescriptor.get(fileId);
+        FileDescriptor archivo = fileDescriptor.get(index);
         byte[] buf = new byte[bufferSize];                                   
 
         
@@ -477,6 +476,29 @@ public class UserProcess {
             archivo.position = archivo.position + offset;                           
             return estado;                                                
         }       
+    }
+
+    public int handleWrite(int index, int bufferAddress, int bufferSize) {
+        Lib.debug(dbgProcess, "Writing file");
+        //validat
+        if (index < 0) {
+            return -1;
+        }
+        FileDescriptor archivo = this.fileDescriptor.get(index);
+        OpenFile file = archivo.file;
+        byte[] buffer = new byte[bufferSize];
+
+        int bytesRead = readVirtualMemory(bufferAddress, buffer);
+        int bytesWritten = file.write(archivo.position, buffer, 0, bytesRead);
+        if (bytesWritten < 0) {
+            //ocurrió un error
+            return -1;
+        }
+        else {
+            archivo.position = archivo.position + bytesWritten;
+            return bytesWritten;
+        }
+        
     }
 
     public int handleClose(int a0) {
