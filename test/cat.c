@@ -20,7 +20,6 @@ int main(int argc, char** argv)
     printf("Unable to open %s\n", argv[1]);
     return 1;
   }
-
   while ((amount = read(fd, buf, BUFSIZE))>0) {
     write(1, buf, amount);
   }

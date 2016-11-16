@@ -35,7 +35,7 @@ public class UserKernel extends ThreadedKernel {
     public void selfTest() {
 	super.selfTest();
 
-	System.out.println("Testing the console device. Typed characters");
+	/*System.out.println("Testing the console device. Typed characters");
 	System.out.println("will be echoed until q is typed.");
 
 	char c;
@@ -44,7 +44,7 @@ public class UserKernel extends ThreadedKernel {
 	    c = (char) console.readByte(true);
 	    console.writeByte(c);
 	}
-	while (c != 'q');
+	while (c != 'q');*/
 
 	System.out.println("");
     }

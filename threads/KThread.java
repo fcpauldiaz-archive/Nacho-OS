@@ -611,5 +611,5 @@ public class KThread {
     public static boolean comunicatorTest = false; // c
     public static boolean joinTest = false; // t
     public static boolean boatTest = false; // b
-    public static boolean priorityTest = true; //p 
+    public static boolean priorityTest = false; //p 
 }

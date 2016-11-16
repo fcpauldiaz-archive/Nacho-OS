@@ -24,10 +24,13 @@ public class UserProcess {
      * Allocate a new process.
      */
     public UserProcess() {
-	int numPhysPages = Machine.processor().getNumPhysPages();
-	pageTable = new TranslationEntry[numPhysPages];
-	for (int i=0; i<numPhysPages; i++)
-	    pageTable[i] = new TranslationEntry(i,i, true,false,false,false);
+        fileDescriptor = new ArrayList();
+        fileDescriptor.add(new FileDescriptor(UserKernel.console.openForReading(), 0));
+        fileDescriptor.add(new FileDescriptor(UserKernel.console.openForWriting(), 1));
+        int numPhysPages = Machine.processor().getNumPhysPages();
+        pageTable = new TranslationEntry[numPhysPages];
+        for (int i=0; i<numPhysPages; i++)
+            pageTable[i] = new TranslationEntry(i,i, true,false,false,false);
     }
     
     /**
@@ -390,7 +393,9 @@ public class UserProcess {
      * @return	the value to be returned to the user.
      */
     public int handleSyscall(int syscall, int a0, int a1, int a2, int a3) {
-	switch (syscall) {
+	System.out.println(syscall);
+    switch (syscall) {
+
 	case syscallHalt:
 	    return handleHalt();
     case syscallCreate:
@@ -404,6 +409,9 @@ public class UserProcess {
     case syscallClose:
         return handleClose(a0);
     case syscallUnlink:
+        return handleUnlink(a0);
+    case syscallExit:
+        return 0;
 
 
 	default:
@@ -433,7 +441,7 @@ public class UserProcess {
             return -1;
         }                                                                  
         else {        
-            fileDescriptor.add(new FileDescriptor(file, 0));
+            fileDescriptor.add(new FileDescriptor(file, fileDescriptor.size()));
             return fileDescriptor.size()-1;//position                                                                                  /*@BAA*/ 
         }                              
 
@@ -480,17 +488,21 @@ public class UserProcess {
 
     public int handleWrite(int index, int bufferAddress, int bufferSize) {
         Lib.debug(dbgProcess, "Writing file");
+        
         //validat
         if (index < 0) {
             return -1;
         }
+
         FileDescriptor archivo = this.fileDescriptor.get(index);
         OpenFile file = archivo.file;
         byte[] buffer = new byte[bufferSize];
 
         int bytesRead = readVirtualMemory(bufferAddress, buffer);
-        int bytesWritten = file.write(archivo.position, buffer, 0, bytesRead);
+      
+        int bytesWritten = file.write(buffer, 0, bytesRead);
         if (bytesWritten < 0) {
+            System.out.println("Nothing written");
             //ocurrió un error
             return -1;
         }
