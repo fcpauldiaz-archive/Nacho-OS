@@ -15,6 +15,7 @@ int main(int argc, char** argv)
     printf("%s\n", "Se ha creado el archivo");
   }
   fe = close(fd);
+  printf("%s\n", "Se ha cerrado al archivo hola.txt");
 
 
   return 0;

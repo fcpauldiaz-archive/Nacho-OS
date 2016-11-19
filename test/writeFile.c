@@ -6,6 +6,7 @@
 
 char buf[BUFSIZE];
 char bufRead[BUFSIZE];
+char str[] = "Prueba nachos\n";
 
 
 int main(int argc, char** argv)
@@ -17,19 +18,15 @@ int main(int argc, char** argv)
   if (fd >= 0) {
     printf("%s\n", "Se ha abierto el archivo hola.txt");
   }
-  strcpy(buf, "Prueba nachos\n");
-  int result = write(fd, buf, sizeof(buf));
+  strcpy(buf, str);
+  int result = write(fd, buf, strlen(str));
   if (result >= 0) {
     printf("%s\n", "Se ha escrito al archivo hola.txt");
   }
-  //
-  //write(fd, buf, 5);
-  //read(fd, bufRead, 3);
-  //printf("test ttttttttttttttttttttttttttttttttttt\n");
-  //write(0, bufRead, 3);
   
   fe = close(fd);
-
+  printf("%s\n", "Se ha cerrado al archivo hola.txt");
+  
 
   return 0;
 }

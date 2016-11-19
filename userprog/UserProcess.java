@@ -474,8 +474,8 @@ public class UserProcess {
         FileDescriptor archivo = fileDescriptor.get(index);
         byte[] buf = new byte[bufferSize];                                   
 
-        
-        int estado = archivo.file.read(archivo.position, buf, 0, bufferSize);
+        //minus 2 to fix unknown problem on read
+        int estado = archivo.file.read(archivo.position-2, buf, 0, bufferSize);
         if (estado < 0) {                                                
             return -1;                                                    
         }                                                                 
@@ -541,13 +541,16 @@ public class UserProcess {
         String nombreArchivo = readVirtualMemoryString(a0, this.maxLength);
         int fileFound  = -1;
         for (int i = 0; i < fileDescriptor.size(); i++) {
+            System.out.println(fileDescriptor.get(i).file.getName());
             if (fileDescriptor.get(i).file.getName().equals(nombreArchivo)) {
                 fileFound = i;
             }
         }
-        if (fileFound < 0) {
+        System.out.println(fileFound + " file found");
+        System.out.println(a0);
+        if (fileFound > 0) {
             //eliminar archivo
-            estadoArchivo = UserKernel.fileSystem.remove(fileDescriptor.get(a0).file.getName());        
+            estadoArchivo = UserKernel.fileSystem.remove(fileDescriptor.get(fileFound).file.getName());        
         }
         else {
             fileDescriptor.get(fileFound).readyToDelete = true;
