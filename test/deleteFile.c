@@ -1,6 +1,6 @@
 #include "syscall.h"
 
-#define TESTFILE "hola2.txt"
+#define TESTFILE "hola.txt"
 
 int main(int argc, char** argv)
 {

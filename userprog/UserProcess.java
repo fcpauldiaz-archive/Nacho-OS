@@ -135,14 +135,29 @@ public class UserProcess {
 				 int length) {
 	Lib.assertTrue(offset >= 0 && length >= 0 && offset+length <= data.length);
 
+    Processor processor = Machine.processor();
 	byte[] memory = Machine.processor().getMemory();
 	
 	// for now, just assume that virtual addresses equal physical addresses
-	if (vaddr < 0 || vaddr >= memory.length)
-	    return 0;
+	//if (vaddr < 0 || vaddr >= memory.length)
+	//    return 0;
+    //virtual pages from address
+    int vpn = processor.pageFromAddress(vaddr);                             
+    int addressOffset = processor.offsetFromAddress(vaddr);                 
+    //represents single virtual address-to-virtual page translation
+    TranslationEntry entry = pageTable[vpn];                                                                                      
+    entry.used = true;                                                      
 
-	int amount = Math.min(length, memory.length-vaddr);
-	System.arraycopy(memory, vaddr, data, offset, amount);
+    int ppn = entry.ppn;                                                    
+    int paddr = (ppn*pageSize) + addressOffset;                             
+    // check if physical page number is out of range
+    if (ppn < 0 || ppn >= processor.getNumPhysPages())  {                   
+        Lib.debug(dbgProcess,                                                
+                "\t\t UserProcess.readVirtualMemory(): bad ppn "+ppn);      
+        return 0;                                                           
+    }                      
+	int amount = Math.min(length, memory.length-paddr);
+	System.arraycopy(memory, paddr, data, offset, amount);
 
 	return amount;
     }
@@ -175,19 +190,47 @@ public class UserProcess {
      * @return	the number of bytes successfully transferred.
      */
     public int writeVirtualMemory(int vaddr, byte[] data, int offset,
-				  int length) {
-	Lib.assertTrue(offset >= 0 && length >= 0 && offset+length <= data.length);
+    				  int length) {
+    	Lib.assertTrue(offset >= 0 && length >= 0 && offset+length <= data.length);
 
-	byte[] memory = Machine.processor().getMemory();
-	
-	// for now, just assume that virtual addresses equal physical addresses
-	if (vaddr < 0 || vaddr >= memory.length)
-	    return 0;
+    	byte[] memory = Machine.processor().getMemory();
+    	Processor processor = Machine.processor();
+    	// for now, just assume that virtual addresses equal physical addresses
+    	//if (vaddr < 0 || vaddr >= memory.length)
+    	//    return 0;
 
-	int amount = Math.min(length, memory.length-vaddr);
-	System.arraycopy(data, offset, memory, vaddr, amount);
 
-	return amount;
+        // calculate virtual page number from the virtual address
+        int vpn = processor.pageFromAddress(vaddr);                             
+        int addressOffset = processor.offsetFromAddress(vaddr);     
+
+        TranslationEntry entry =  pageTable[vpn]; 
+        //written or read by program                                             
+        entry.used = true;    
+        //written by the program                                      
+        entry.dirty = true;                                         
+        //physical page number
+        int ppn = entry.ppn;  
+        //physical address                                      
+        int paddr = (ppn*pageSize) + addressOffset;                 
+
+        if (entry.readOnly) {                                       
+            Lib.debug(dbgProcess,"writeVirtualMemory-> read-only page " + ppn); 
+            return 0;                                               
+        }                                                           
+
+        // check if physical page number is out of range
+        if (ppn < 0 || ppn >= processor.getNumPhysPages())  {       
+           
+            return 0;                                               
+        }                                                           
+
+        int amount = Math.min(length, memory.length-vaddr);
+        Lib.debug(dbgProcess, "writeVirtualMemory ->  amount: "+amount);
+    
+        System.arraycopy(data, offset, memory, vaddr, amount);
+
+        return amount;
     }
 
     /**
@@ -442,7 +485,7 @@ public class UserProcess {
         }                                                                  
         else {        
             fileDescriptor.add(new FileDescriptor(file, fileDescriptor.size()));
-            return fileDescriptor.size()-1;//position                                                                                  /*@BAA*/ 
+            return fileDescriptor.size()-1;//length                                                                                  /*@BAA*/ 
         }                              
 
     }
