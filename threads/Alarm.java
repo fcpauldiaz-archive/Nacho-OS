@@ -81,7 +81,7 @@ public class Alarm {
        
       ThreadWaiting alarmTo = new ThreadWaiting(wakeTime, KThread.currentThread());
       waitingThreads.add(alarmTo);
-    	 
+      Lib.debug('a', "--- " + KThread.currentThread().getName() +" durmiendo: " + Machine.timer().getTime());
       KThread.sleep();
 
       Machine.interrupt().restore(intStatus);

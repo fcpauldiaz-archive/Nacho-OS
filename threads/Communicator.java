@@ -54,7 +54,7 @@ public class Communicator {
             condSpeaker.sleep(); 
         }
         lock.release();
-        Lib.debug('c', "Speak word " + word);
+        Lib.debug('c', "Speak word " + KThread.currentThread().getName()+ " : " + word);
         lock.acquire();
         //speaker says the word
         this.transferWord = word;
@@ -87,7 +87,7 @@ public class Communicator {
         }
         int word = this.transferWord;
         lock.release();
-        Lib.debug('c', "Listen word " + word);
+        Lib.debug('c', "Listen word " + KThread.currentThread().getName() + ": " + word);
         lock.acquire();
         //ya se transfirio la palabra
         this.wordReady = false;

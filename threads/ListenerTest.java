@@ -8,11 +8,11 @@ public class ListenerTest implements Runnable{
     }
 
     public void run(){
-        for (int i=0; i<2; i++) {
+        for (int i=0; i<5; i++) {
             this.com.listen();
             int random = 1000 + (int)(Math.random() * 3000);
-            Lib.debug('c', KThread.currentThread().getName()+ " se va a dormir: "+random);
-            ThreadedKernel.alarm.waitUntil(random);
+            //Lib.debug('c', KThread.currentThread().getName()+ " se va a dormir: "+random);
+            //ThreadedKernel.alarm.waitUntil(random);
         }
     }
 }

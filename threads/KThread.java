@@ -455,6 +455,46 @@ public class KThread {
 		private int which; 
 	}
 
+     private static class TestPriority implements Runnable { 
+        private int which; 
+        TestPriority(int which) {
+         this.which = which;
+
+        } 
+        public void run() { 
+            for (int i=0; i < 5; i++) { 
+            System.out.println("*** thread " + which + " looped " + i + " times, Tick:" + Machine.timer().getTime()); 
+            System.out.println(i);
+            currentThread.yield(); 
+            }
+           
+            
+        }
+    }
+
+    private static class TestUVG implements Runnable { 
+        private int which; 
+        TestUVG(int which) {
+         this.which = which;
+
+        } 
+        public void run() { 
+            for (int i=0; i < 5; i++) { 
+            System.out.println("*** thread " + which + " looped " + i + " times, Tick:" + Machine.timer().getTime()); 
+            if ((which == 1) && (i==0)) 
+                dos.join(); 
+            //if ((which == 2) && (i==0))
+                //tres.join(); 
+            if ((which == 3) && (i ==0)) {
+                ThreadedKernel.alarm.waitUntil(1500); 
+            }
+            currentThread.yield(); 
+            }
+           
+            
+        }
+    }
+
     public static void selfTestRun(KThread t1, int t1p, KThread t2, int t2p, KThread t3, int t3p) { 
         boolean int_state; 
 
@@ -475,6 +515,16 @@ public class KThread {
 
     public static void selfTest() {
         Lib.debug(dbgThread, "Enter KThread.selfTest"); 
+        if (joinRealTest) {
+            uno = new KThread(new TestUVG(1)).setName("forked thread1"); 
+            uno.fork(); 
+            dos = new KThread(new TestUVG(2)).setName("forked thread2"); 
+            dos.fork();
+            tres = new KThread(new TestUVG(3)).setName("forked thread3"); 
+            tres.fork(); 
+        }
+
+
         if (joinTest) {
             cero = new KThread(new PingTest(0)).setName("forked thread0"); 
             cero.fork(); 
@@ -494,14 +544,20 @@ public class KThread {
           cero.fork();
           uno = new KThread(new SpeakerTest(com)).setName("Speaker 1");
           uno.fork();
-          dos = new KThread(new SpeakerTest(com)).setName("Speaker 2");
+          dos = new KThread(new ListenerTest(com)).setName("Listener 2");
           dos.fork();
-          tres = new KThread(new ListenerTest(com)).setName("Listener 2");
+          tres = new KThread(new SpeakerTest(com)).setName("SpeakerTest 2");
           tres.fork(); 
+          cuatro = new KThread(new ListenerTest(com)).setName("Listener 3");
+          cuatro.fork();
+          cinco = new KThread(new SpeakerTest(com)).setName("Speaker 3");
+          cinco.fork();
           cero.join();
           uno.join();
           dos.join();
           tres.join();
+          cuatro.join();
+          cinco.join();
           Lib.debug(dbgThreadComunicator, "Sale comunicator");
         }
         if (boatTest) {
@@ -517,7 +573,7 @@ public class KThread {
         * 
         */ 
         if (priorityTest) {
-            Lib.debug(dbPriorityCom, "Case 3: "); 
+            //Lib.debug(dbPriorityCom, "Case 3: "); 
 
             final Lock lock = new Lock(); 
             Condition2 condition = new Condition2(lock); 
@@ -559,6 +615,24 @@ public class KThread {
                 } 
             }); 
             selfTestRun(t1, 6, t2, 4, t3, 7); 
+        }
+
+        if (priorityTest2) {
+            cero = new KThread(new TestPriority(0)).setName("prueba 2"); 
+            cero.fork(); 
+            uno = new KThread(new TestPriority(1)).setName("prueb"); 
+            uno.fork(); 
+            dos = new KThread(new TestPriority(2)).setName("forked thread2"); 
+            dos.fork();
+            Machine.interrupt().disable();
+            ThreadedKernel.scheduler.setPriority(uno, 1);
+            ThreadedKernel.scheduler.setPriority(cero, 5);
+            ThreadedKernel.scheduler.setPriority(dos, 4); 
+            Machine.interrupt().enable();
+            cero.join();
+            uno.join();
+            dos.join();
+          
         }
     }
 
@@ -607,9 +681,13 @@ public class KThread {
   	public static KThread uno = null; 
   	public static KThread dos = null; 
   	public static KThread cero = null; 
+    public static KThread cuatro = null;
+    public static KThread cinco = null;
     public static boolean AlarmTest = false; // l
     public static boolean comunicatorTest = false; // c
     public static boolean joinTest = false; // t
     public static boolean boatTest = false; // b
     public static boolean priorityTest = false; //p 
+    public static boolean joinRealTest = false;
+    public static boolean priorityTest2 = false;
 }

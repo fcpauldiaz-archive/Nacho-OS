@@ -9,10 +9,10 @@ public class SpeakerTest implements Runnable {
 
     public void run(){
         int random = 2000;
-        for (int i=0; i<2; i++) {
-            this.com.speak(++random);
-            Lib.debug('c', KThread.currentThread().getName()+ " dormirá ticks: "+random); 
-            ThreadedKernel.alarm.waitUntil(random + (int)(Math.random() * 3000));
+        for (int i=0; i<5; i++) {
+            this.com.speak((int)(Math.random() * 3000));
+            //Lib.debug('c', KThread.currentThread().getName()+ " dormirá ticks: "+random); 
+            //ThreadedKernel.alarm.waitUntil(random + (int)(Math.random() * 3000));
         }
     }
 }

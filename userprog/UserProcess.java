@@ -495,7 +495,7 @@ public class UserProcess {
         String nombreArchivo = readVirtualMemoryString(a0, this.maxLength);
          // abrir archivo a través de stubFilesystem
         OpenFile file  = UserKernel.fileSystem.open(nombreArchivo, open);     
-
+        
         if (file == null) {                                              
             return -1;                                                     
         }

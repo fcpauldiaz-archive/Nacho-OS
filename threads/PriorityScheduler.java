@@ -259,7 +259,8 @@ public class PriorityScheduler extends Scheduler {
     	public ThreadState(KThread thread) {
     	    this.thread = thread;
           
-    	    if (thread.getName().contains("Speaker 2")) {
+    	    if (thread.getName().contains("prueba")) {
+            System.out.println("TEST");
             setPriority(4);
           }
           else {
