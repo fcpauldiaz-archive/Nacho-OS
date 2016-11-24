@@ -145,16 +145,17 @@ public class UserProcess {
 	// for now, just assume that virtual addresses equal physical addresses
 	//if (vaddr < 0 || vaddr >= memory.length)
 	//    return 0;
-    //virtual pages from address
-    int vpn = processor.pageFromAddress(vaddr);                             
+    //cantidad de páginas virtuales a leer
+    int vpn = processor.pageFromAddress(vaddr);  
+    //páginas que faltan                           
     int addressOffset = processor.offsetFromAddress(vaddr);                 
-    //represents single virtual address-to-virtual page translation
+    
     TranslationEntry entry = pageTable[vpn];                                                                                      
     entry.used = true;                                                      
 
     int ppn = entry.ppn;                                                    
     int paddr = (ppn*pageSize) + addressOffset;                             
-    // check if physical page number is out of range
+    // 
     if (ppn < 0 || ppn >= processor.getNumPhysPages())  {                   
         Lib.debug(dbgProcess,                                                
                 "\t\t UserProcess.readVirtualMemory(): bad ppn "+ppn);      
@@ -204,7 +205,7 @@ public class UserProcess {
     	//    return 0;
 
 
-        // calculate virtual page number from the virtual address
+        // calcular virtual page number from the virtual address
         int vpn = processor.pageFromAddress(vaddr);                             
         int addressOffset = processor.offsetFromAddress(vaddr);     
 
@@ -222,8 +223,6 @@ public class UserProcess {
             Lib.debug(dbgProcess,"writeVirtualMemory-> read-only page " + ppn); 
             return 0;                                               
         }                                                           
-
-        // check if physical page number is out of range
         if (ppn < 0 || ppn >= processor.getNumPhysPages())  {       
            
             return 0;                                               
@@ -300,12 +299,6 @@ public class UserProcess {
 
 	// and finally reserve 1 page for arguments
 	numPages++;
-
-    pageTable = new TranslationEntry[numPages];                                        /* @BBA */
-    for (int i = 0; i < numPages; i++) {                                               /* @BBA */
-        int ppn = UserKernel.getFreePages();                                            /* @BBA */
-        pageTable[i] =  new TranslationEntry(i, ppn, true, false, false, false);       /* @BBA */
-    }  
 
 	if (!loadSections())
 	    return false;
@@ -407,7 +400,6 @@ public class UserProcess {
     private int handleHalt() {
 
 	Machine.halt();
-    Kernel.kernel.terminate();
 	
 	Lib.assertNotReached("Machine.halt() did not halt machine!");
 	return 0;
@@ -544,7 +536,7 @@ public class UserProcess {
             return -1;                                                    
         }                                                                 
         else {                                                                                   
-            return  writeVirtualMemory(bufferAddress, buf);                                            
+            return writeVirtualMemory(bufferAddress, buf, 0, estado);                                           
         }       
     }
 
@@ -622,10 +614,11 @@ public class UserProcess {
     }*/
 
     public int handleExit(int estado) {
+        System.out.println("exit " + estado);
         for (int i = 0; i < fileDescriptor.size(); i++) {
             handleClose(i);
         }
-        System.out.println("exit " + estado);
+       
         unloadSections();
         process.remove(pid);
         if (process.isEmpty()) {
@@ -670,12 +663,8 @@ public class UserProcess {
     public class FileDescriptor {  
 
         public  OpenFile file = null;   
-        //public  int      position = 0;  
-        public boolean readyToDelete;
-
         public FileDescriptor(OpenFile file) {                                 
             this.file = file;
-            this.readyToDelete = false;
         }                                                         
         
                                             

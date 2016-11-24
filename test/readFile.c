@@ -23,7 +23,7 @@ int main(int argc, char** argv)
   printf("%s\n", "Se ha leído el archivo hola.txt");
 
   close(fd);
-  halt();
+  exit(0);
 
   return 0;
 }
