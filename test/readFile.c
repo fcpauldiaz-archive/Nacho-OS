@@ -24,7 +24,6 @@ int main(int argc, char** argv)
 
   close(fd);
   halt();
-  //readline("     ", 5);
 
   return 0;
 }

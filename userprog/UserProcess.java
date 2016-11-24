@@ -26,8 +26,8 @@ public class UserProcess {
      */
     public UserProcess() {
         fileDescriptor = new ArrayList();
-        fileDescriptor.add(new FileDescriptor(UserKernel.console.openForReading(), 0));
-        fileDescriptor.add(new FileDescriptor(UserKernel.console.openForWriting(), 1));
+        fileDescriptor.add(new FileDescriptor(UserKernel.console.openForReading()));
+        fileDescriptor.add(new FileDescriptor(UserKernel.console.openForWriting()));
         int numPhysPages = Machine.processor().getNumPhysPages();
         pageTable = new TranslationEntry[numPhysPages];
         for (int i=0; i<numPhysPages; i++)
@@ -506,7 +506,7 @@ public class UserProcess {
             return -1;
         }                                                                  
         else {        
-            fileDescriptor.add(new FileDescriptor(file, fileDescriptor.size()));
+            fileDescriptor.add(new FileDescriptor(file));
             return fileDescriptor.size()-1;//length                                                                                  /*@BAA*/ 
         }                              
 
@@ -569,7 +569,7 @@ public class UserProcess {
             return -1;
         }
         else {
-            archivo.position = archivo.position + bytesWritten;
+           // archivo.position = archivo.position + bytesWritten;
             return bytesWritten;
         }
         
@@ -582,14 +582,10 @@ public class UserProcess {
         }
         boolean estado = true;
         FileDescriptor archivo = fileDescriptor.get(a0);
-        archivo.position = 0;
+        //archivo.position = 0;
         archivo.file.close();
-        //eliminar el archivo                                
-        if (archivo.readyToDelete) {                                               
-            estado = UserKernel.fileSystem.remove(archivo.file.getName());          
-            archivo.readyToDelete = false;                                           
-        }                  
-        return estado ? 0 : -1;
+                
+        return 1;
     }
     /**
      * Eliminar archivo 
@@ -610,7 +606,6 @@ public class UserProcess {
             }
         }       
         System.out.println(fileFound + " file found");
-        System.out.println(a0);
         if (fileFound > 0) {
             //eliminar archivo
             estadoArchivo = UserKernel.fileSystem.remove(fileDescriptor.get(fileFound).file.getName());        
@@ -675,12 +670,11 @@ public class UserProcess {
     public class FileDescriptor {  
 
         public  OpenFile file = null;   
-        public  int      position = 0;  
+        //public  int      position = 0;  
         public boolean readyToDelete;
 
-        public FileDescriptor(OpenFile file, int position) {                                 
+        public FileDescriptor(OpenFile file) {                                 
             this.file = file;
-            this.position = position;
             this.readyToDelete = false;
         }                                                         
         
