@@ -16,6 +16,7 @@ int main(int argc, char** argv)
   int fd = creat("prueba.txt");
   //strcpy(buf, str);
   int result = write(fd, buf, BUFSIZE);
+  halt();
   //leer de consola
   //crear archivo
   //escribir archivo
