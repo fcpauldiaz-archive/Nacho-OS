@@ -436,7 +436,7 @@ public class UserProcess {
      * @return	the value to be returned to the user.
      */
     public int handleSyscall(int syscall, int a0, int a1, int a2, int a3) {
-	System.out.println(syscall);
+	//System.out.println(syscall);
     switch (syscall) {
 
 	case syscallHalt:
@@ -485,7 +485,7 @@ public class UserProcess {
         }                                                                  
         else {        
             fileDescriptor.add(new FileDescriptor(file, fileDescriptor.size()));
-            return fileDescriptor.size()-1;//length                                                                                  /*@BAA*/ 
+            return fileDescriptor.size();//length                                                                                  /*@BAA*/ 
         }                              
 
     }
@@ -516,16 +516,13 @@ public class UserProcess {
         }
         FileDescriptor archivo = fileDescriptor.get(index);
         byte[] buf = new byte[bufferSize];                                   
-
         //minus 2 to fix unknown problem on read
-        int estado = archivo.file.read(archivo.position-2, buf, 0, bufferSize);
+        int estado = archivo.file.read(buf, 0, bufferSize);
         if (estado < 0) {                                                
             return -1;                                                    
         }                                                                 
-        else {                                                            
-            int offset = writeVirtualMemory(bufferAddress, buf);                  
-            archivo.position = archivo.position + offset;                           
-            return estado;                                                
+        else {                                                                                   
+            return  writeVirtualMemory(bufferAddress, buf);                                            
         }       
     }
 

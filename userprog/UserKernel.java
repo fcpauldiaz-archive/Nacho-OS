@@ -3,6 +3,7 @@ package nachos.userprog;
 import nachos.machine.*;
 import nachos.threads.*;
 import nachos.userprog.*;
+import java.util.ArrayList;
 
 /**
  * A kernel that can support multiple user processes.
@@ -107,8 +108,26 @@ public class UserKernel extends ThreadedKernel {
 	super.terminate();
     }
 
+    /**
+     * Get first page
+     * @return integer. -1 if there are not free pages.
+     */
+    public int getFreePage() {
+       boolean intStatus = Machine.interrupt().disable();
+       int page = -1;
+       if (!freePage.isEmpty()) {
+        page = freePage.get(0);
+        freePage.remove(0);
+       }
+
+       Machine.interrupt().restore(intStatus);
+       return page;
+    }
+
     /** Globally accessible reference to the synchronized console. */
     public static SynchConsole console;
+
+    public static ArrayList freePage = new ArrayList();
 
     // dummy variables to make javac smarter
     private static Coff dummy1 = null;
