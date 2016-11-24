@@ -10,7 +10,7 @@ char buf[BUFSIZE];
 int main(int argc, char** argv)
 {
   int fd, amount;
-
+  //exit(0);
 
   fd = open(TESTFILE);
   if (fd==-1) {

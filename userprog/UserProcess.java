@@ -300,6 +300,11 @@ public class UserProcess {
 	// and finally reserve 1 page for arguments
 	numPages++;
 
+    pageTable = new TranslationEntry[numPages];                                        
+    for (int i = 0; i < numPages; i++) {                                                                                    
+        pageTable[i] =  new TranslationEntry(i, UserKernel.getFreePages(), true, false, false, false);       
+    }                      
+
 	if (!loadSections())
 	    return false;
 
@@ -530,7 +535,7 @@ public class UserProcess {
         }
         FileDescriptor archivo = fileDescriptor.get(index);
         byte[] buf = new byte[bufferSize];                                   
-        //minus 2 to fix unknown problem on read
+        
         int estado = archivo.file.read(buf, 0, bufferSize);
         if (estado < 0) {                                                
             return -1;                                                    
@@ -543,7 +548,7 @@ public class UserProcess {
     public int handleWrite(int index, int bufferAddress, int bufferSize) {
         Lib.debug(dbgProcess, "Writing file");
         
-        //validat
+        //validate
         if (index < 0) {
             return -1;
         }
@@ -561,7 +566,6 @@ public class UserProcess {
             return -1;
         }
         else {
-           // archivo.position = archivo.position + bytesWritten;
             return bytesWritten;
         }
         
@@ -573,8 +577,11 @@ public class UserProcess {
             return -1;
         }
         boolean estado = true;
+        if (fileDescriptor.size() < a0) {
+            return -1;
+        }   
         FileDescriptor archivo = fileDescriptor.get(a0);
-        //archivo.position = 0;
+
         archivo.file.close();
                 
         return 1;
