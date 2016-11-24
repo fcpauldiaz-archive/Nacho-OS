@@ -116,7 +116,7 @@ public class UserKernel extends ThreadedKernel {
        boolean intStatus = Machine.interrupt().disable();
        int page = -1;
        if (!freePage.isEmpty()) {
-        page = freePage.get(0);
+        page = this.freePage.get(0);
         freePage.remove(0);
        }
 
@@ -127,7 +127,7 @@ public class UserKernel extends ThreadedKernel {
     /** Globally accessible reference to the synchronized console. */
     public static SynchConsole console;
 
-    public static ArrayList freePage = new ArrayList();
+    public static ArrayList<Integer> freePage = new ArrayList();
 
     // dummy variables to make javac smarter
     private static Coff dummy1 = null;

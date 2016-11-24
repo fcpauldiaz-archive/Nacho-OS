@@ -329,50 +329,34 @@ public class UserProcess {
      * @return	<tt>true</tt> if the sections were successfully loaded.
      */
     protected boolean loadSections() {
-        if (numPages > Machine.processor().getNumPhysPages()) {
-            coff.close();
-            Lib.debug(dbgProcess, "\tinsufficient physical memory");
-            return false;
-        }
-        pageTable = new TranslationEntry[numPages];
-        
-        for (int i=0; i<numPages; i++) {
-            int physPage = UserKernel.allocatePage();
-            if (physPage < 0) {
-                Lib.debug(dbgProcess, "\tunable to allocate pages; tried " + numPages + ", did " + i );
-                for (int j=0; j<i; j++) {
-                    if (pageTable[j].valid) {
-                        UserKernel.deallocatePage(pageTable[j].ppn);
-                        pageTable[j].valid = false;
-                    }
-                }
-                coff.close();
-                return false;
-            }
-            pageTable[i] = new TranslationEntry(i, physPage, true, false, false, false);
-        }
-        
-        // load sections
-        for (int s=0; s<coff.getNumSections(); s++) {
-            CoffSection section = coff.getSection(s);
-            
-            Lib.debug(dbgProcess, "\tinitializing " + section.getName()
-                      + " section (" + section.getLength() + " pages)");
+	if (numPages > Machine.processor().getNumPhysPages()) {
+	    coff.close();
+	    Lib.debug(dbgProcess, "\tinsufficient physical memory");
+	    return false;
+	}
 
-            for (int i=0; i<section.getLength(); i++) {
-                int vpn = section.getFirstVPN()+i;
+	// load sections
+	for (int s=0; s<coff.getNumSections(); s++) {
+	    CoffSection section = coff.getSection(s);
+	    
+	    Lib.debug(dbgProcess, "\tinitializing " + section.getName()
+		      + " section (" + section.getLength() + " pages)");
 
-                // for now, just assume virtual addresses=physical addresses
-                int ppn = pageTable[vpn].ppn;
-                section.loadPage(i, ppn);
-                if (section.isReadOnly()) {
-                    pageTable[vpn].readOnly = true;
-                }
-            }
-        }
+	    for (int i=0; i<section.getLength(); i++) {
+		int vpn = section.getFirstVPN()+i;
+
+		// for now, just assume virtual addresses=physical addresses
+		//section.loadPage(i, vpn);
         
-        coff.close();
-        return true;
+        TranslationEntry entry = pageTable[vpn];                                  
+        entry.readOnly = section.isReadOnly();                                     
+        int ppn = entry.ppn;                                                        
+        
+        section.loadPage(i, ppn);
+	    }
+	}
+	
+	return true;
     }
 
     /**
@@ -507,7 +491,7 @@ public class UserProcess {
         }                                                                  
         else {        
             fileDescriptor.add(new FileDescriptor(file, fileDescriptor.size()));
-            return fileDescriptor.size();//length                                                                                  /*@BAA*/ 
+            return fileDescriptor.size()-1;//length                                                                                  /*@BAA*/ 
         }                              
 
     }
@@ -604,6 +588,7 @@ public class UserProcess {
         int fileFound  = -1;
         for (int i = 0; i < fileDescriptor.size(); i++) {
             System.out.println(fileDescriptor.get(i).file.getName());
+            System.out.println(nombreArchivo);
             if (fileDescriptor.get(i).file.getName().equals(nombreArchivo)) {
                 fileFound = i;
             }
@@ -615,7 +600,7 @@ public class UserProcess {
             estadoArchivo = UserKernel.fileSystem.remove(fileDescriptor.get(fileFound).file.getName());        
         }
         else {
-            fileDescriptor.get(fileFound).readyToDelete = true;
+            estadoArchivo = false;
         }
         return estadoArchivo ? 0 : -1;      
 
