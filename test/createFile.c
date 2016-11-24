@@ -16,7 +16,7 @@ int main(int argc, char** argv)
   }
   fe = close(fd);
   printf("%s\n", "Se ha cerrado al archivo hola.txt");
-
+  halt();
 
   return 0;
 }

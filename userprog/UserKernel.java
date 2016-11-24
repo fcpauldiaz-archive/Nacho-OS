@@ -28,8 +28,13 @@ public class UserKernel extends ThreadedKernel {
 	Machine.processor().setExceptionHandler(new Runnable() {
 		public void run() { exceptionHandler(); }
 	    });
+    int numPhysPages = Machine.processor().getNumPhysPages();     // @BAA
+    for (int i = 0; i < numPhysPages; i++)  {                       // @BAA          
+        freePage.add(i);       
+    }
     }
 
+   
     /**
      * Test the console device.
      */	
@@ -112,16 +117,22 @@ public class UserKernel extends ThreadedKernel {
      * Get first page
      * @return integer. -1 if there are not free pages.
      */
-    public int getFreePage() {
+    public static int getFreePages() {
        boolean intStatus = Machine.interrupt().disable();
        int page = -1;
        if (!freePage.isEmpty()) {
-        page = this.freePage.get(0);
+        page =  freePage.get(0);
         freePage.remove(0);
        }
 
        Machine.interrupt().restore(intStatus);
        return page;
+    }
+
+    public static void addFreePages(int page) {
+        boolean intStatus = Machine.interrupt().disable();
+        freePage.add(page);
+        Machine.interrupt().restore(intStatus);
     }
 
     /** Globally accessible reference to the synchronized console. */

@@ -4,6 +4,7 @@ import nachos.machine.*;
 import nachos.threads.*;
 import nachos.userprog.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import java.io.EOFException;
 
@@ -31,6 +32,9 @@ public class UserProcess {
         pageTable = new TranslationEntry[numPhysPages];
         for (int i=0; i<numPhysPages; i++)
             pageTable[i] = new TranslationEntry(i,i, true,false,false,false);
+
+        pid = pNumber++;
+        process.put(pid, this);
     }
     
     /**
@@ -297,6 +301,12 @@ public class UserProcess {
 	// and finally reserve 1 page for arguments
 	numPages++;
 
+    pageTable = new TranslationEntry[numPages];                                        /* @BBA */
+    for (int i = 0; i < numPages; i++) {                                               /* @BBA */
+        int ppn = UserKernel.getFreePages();                                            /* @BBA */
+        pageTable[i] =  new TranslationEntry(i, ppn, true, false, false, false);       /* @BBA */
+    }  
+
 	if (!loadSections())
 	    return false;
 
@@ -343,16 +353,15 @@ public class UserProcess {
 		      + " section (" + section.getLength() + " pages)");
 
 	    for (int i=0; i<section.getLength(); i++) {
-		int vpn = section.getFirstVPN()+i;
+		    int vpn = section.getFirstVPN()+i;
 
-		// for now, just assume virtual addresses=physical addresses
-		//section.loadPage(i, vpn);
-        
-        TranslationEntry entry = pageTable[vpn];                                  
-        entry.readOnly = section.isReadOnly();                                     
-        int ppn = entry.ppn;                                                        
-        
-        section.loadPage(i, ppn);
+    		// for now, just assume virtual addresses=physical addresses
+    		//section.loadPage(i, vpn);
+            
+            TranslationEntry entry = pageTable[vpn];                                  
+            entry.readOnly = section.isReadOnly();      
+            
+            section.loadPage(i, entry.ppn);
 	    }
 	}
 	
@@ -363,6 +372,10 @@ public class UserProcess {
      * Release any resources allocated by <tt>loadSections()</tt>.
      */
     protected void unloadSections() {
+        for (int i = 0; i < numPages; i++) {                                       /*@BBA*/
+            UserKernel.addFreePages(pageTable[i].ppn);                              /*@BBA*/
+            pageTable[i].valid = false;                                            /*@BBA*/
+        }         
     }    
 
     /**
@@ -394,6 +407,7 @@ public class UserProcess {
     private int handleHalt() {
 
 	Machine.halt();
+    Kernel.kernel.terminate();
 	
 	Lib.assertNotReached("Machine.halt() did not halt machine!");
 	return 0;
@@ -455,12 +469,14 @@ public class UserProcess {
         return handleOpen(a0, false);
     case syscallWrite:
         return handleWrite(a0, a1, a2);
+    case syscallExec:
+        //return handleExec(a0, a1, a2);
     case syscallClose:
         return handleClose(a0);
     case syscallUnlink:
         return handleUnlink(a0);
     case syscallExit:
-        return 0;
+        return handleExit(a0);
 
 
 	default:
@@ -592,7 +608,7 @@ public class UserProcess {
             if (fileDescriptor.get(i).file.getName().equals(nombreArchivo)) {
                 fileFound = i;
             }
-        }
+        }       
         System.out.println(fileFound + " file found");
         System.out.println(a0);
         if (fileFound > 0) {
@@ -604,6 +620,24 @@ public class UserProcess {
         }
         return estadoArchivo ? 0 : -1;      
 
+    }
+
+    /*public int handleExec(int archivo, int argc, int argv) {
+
+    }*/
+
+    public int handleExit(int estado) {
+        for (int i = 0; i < fileDescriptor.size(); i++) {
+            handleClose(i);
+        }
+        System.out.println("exit " + estado);
+        unloadSections();
+        process.remove(pid);
+        if (process.isEmpty()) {
+            Kernel.kernel.terminate();
+        }
+        UThread.finish();
+        return 0;
     }
 
 
@@ -666,8 +700,17 @@ public class UserProcess {
     private int initialPC, initialSP;
     private int argc, argv;
     private ArrayList<FileDescriptor> fileDescriptor = new ArrayList();
+    //save ids
+    //public ArrayList<Integer> process = new ArrayList(); 
+    
+    private int pid;
+    private int ppid;
 	private final int maxLength = 256; //cantidad máxima de bytes por archivo
     private final int maxOpenFiles = 16; //cantidad máxima de procesos permitidos.
     private static final int pageSize = Processor.pageSize;
     private static final char dbgProcess = 'a';
+    private UThread thread;
+
+    public static int pNumber = 0;
+    public static HashMap<Integer, UserProcess> process = new HashMap();
 }
