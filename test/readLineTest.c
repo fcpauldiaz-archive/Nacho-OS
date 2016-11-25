@@ -1,7 +1,7 @@
 #include "syscall.h"
 
 
-#define TESTFILE "hola.txt"
+#define TESTFILE "prueba.txt"
 #define BUFSIZE 1024
 
 char buf[BUFSIZE];
@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 {
 
   readline(buf, BUFSIZE);
-  int fd = creat("prueba.txt");
+  int fd = creat(TESTFILE);
   //strcpy(buf, str);
   int result = write(fd, buf, BUFSIZE);
   halt();
